@@ -1,5 +1,6 @@
 import sys
 from dataclasses import dataclass
+from typing import Sequence
 
 @dataclass(frozen=True)
 class Point:
@@ -57,6 +58,22 @@ class Grid:
 
         return sumits
 
+    def get_sumit_paths(self, path: Sequence[Point]) -> set[Sequence[Point]]:
+        """
+        Get all the possible sumit locations reachable from this point.
+        """
+        head = path[-1]
+        height = self.get_height(head)
+        if height == 9:
+            return {path}
+
+        paths = set()
+        for neighbor in self.get_neighbors(head):
+            if self.get_height(neighbor) == height + 1:
+                paths.update(self.get_sumit_paths((*path, neighbor)))
+
+        return paths
+
 def main():
     grid = Grid([line.strip() for line in sys.stdin.readlines()])
 
@@ -66,6 +83,12 @@ def main():
         score += len(grid.get_sumits(trailhead))
 
     print("[Part one] trailhead scores:", score)
+
+    score = 0
+    for trailhead in trailheads:
+        score += len(grid.get_sumit_paths((trailhead,)))
+
+    print("[Part two] trailhead scores:", score)
 
 
 if __name__ == "__main__":
