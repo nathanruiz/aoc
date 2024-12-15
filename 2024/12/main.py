@@ -1,7 +1,13 @@
 import re
 import sys
 from dataclasses import dataclass
+from enum import Enum
 
+class Direction(Enum):
+    UP = 1
+    DOWN = 2
+    LEFT = 3
+    RIGHT = 4
 
 @dataclass(frozen=True)
 class Point:
@@ -19,6 +25,19 @@ class Point:
             self.add(-1, 0),
         ]
 
+    def get_line_between(self, point: "Point") -> Direction:
+        if point.y == self.y:
+            if point.x == self.x + 1:
+                return Direction.DOWN
+            elif point.x == self.x - 1:
+                return Direction.UP
+        elif point.x == self.x:
+            if point.y == self.y + 1:
+                return Direction.RIGHT
+            elif point.y == self.y - 1:
+                return Direction.LEFT
+        raise ValueError("Invalid direction")
+
 @dataclass
 class Region:
     points: set[Point]
@@ -33,6 +52,33 @@ class Region:
                 if neighbor not in self.points:
                     perimeter += 1
         return perimeter
+
+    def get_sides(self) -> int:
+        lines = []
+        for point in self.points:
+            for neighbor in point.neighbors():
+                if neighbor not in self.points:
+                    lines.append((point, point.get_line_between(neighbor)))
+
+        result = []
+        while lines:
+            line = lines.pop()
+            result.append(line)
+            open_set = {line}
+            closed_set = set()
+            while open_set:
+                point, direction = open_set.pop()
+                for neighbor in point.neighbors():
+                    key = (neighbor, direction)
+                    if key in closed_set:
+                        continue
+
+                    if key in lines:
+                        lines.remove(key)
+                        open_set.add(key)
+
+        return len(result)
+
 
 class Garden:
     def __init__(self, lines: list[str]) -> None:
@@ -78,11 +124,18 @@ class Garden:
 def main():
     garden = Garden([line.strip() for line in sys.stdin.readlines()])
     regions = garden.get_regions()
+
     price = sum(
         region.get_area() * region.get_perimeter()
         for region in regions
     )
     print("[Part one] Total price:", price)
+
+    price = sum(
+        region.get_area() * region.get_sides()
+        for region in regions
+    )
+    print("[Part two] Total price:", price)
 
 
 if __name__ == "__main__":
