@@ -7,9 +7,8 @@ class BatteryBank:
     def __init__(self, line: str) -> None:
         self.bank = [int(char) for char in line]
 
-    def get_largest_joltage(self) -> int:
+    def get_largest_joltage(self, battery_count: int) -> int:
         joltage = 0
-        battery_count = 2
         start = 0
         for i in range(battery_count):
             # For the next digit, we need to skip over any digits we have
@@ -35,16 +34,16 @@ class BatteryBank:
 
 
 
-def part1(lines):
-    total = 0
-    for line in lines:
+def main():
+    part1_total = 0
+    part2_total = 0
+    for line in sys.stdin:
         line = line.strip()
         bank = BatteryBank(line)
-        total += bank.get_largest_joltage()
-    print(f"[Part one] Battery bank joltage sum {total}")
-
-def main():
-    part1(sys.stdin.readlines())
+        part1_total += bank.get_largest_joltage(2)
+        part2_total += bank.get_largest_joltage(12)
+    print(f"[Part one] Battery bank joltage sum {part1_total}")
+    print(f"[Part two] Battery bank joltage sum {part2_total}")
 
 if __name__ == "__main__":
     main()
