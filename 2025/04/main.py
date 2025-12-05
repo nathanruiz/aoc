@@ -66,13 +66,27 @@ class Grid:
         if roll_count <= 4:
             return True
 
+    def remove_roll(self, location: Location) -> bool:
+        self.rolls[location.y][location.x] = False
+
 
 def main():
     lines = sys.stdin.readlines()
     grid = Grid(lines)
     locations = grid.get_accessible_rolls()
-
     print(f"[Part one] Accessible rolls {len(locations)}")
+
+    removed = 0
+    while True:
+        locations = grid.get_accessible_rolls()
+        if len(locations) == 0:
+            break
+
+        for location in locations:
+            grid.remove_roll(location)
+            removed += 1
+
+    print(f"[Part two] Removable rolls {removed}")
 
 
 if __name__ == "__main__":
